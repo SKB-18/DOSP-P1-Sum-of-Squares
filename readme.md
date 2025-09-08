@@ -10,12 +10,6 @@
 
 ## 0) Setup & dependencies
 
-- Install **Erlang/OTP ≥ 25** and **Gleam ≥ 1.2**.
-- Verify tools:
-  ```powershell
-  gleam --version
-  erl -eval "erlang:display(erlang:system_info(otp_release)), halt()." -noshell
-  ```
 - Get the code (clone or unzip) and open a shell **at the repo root**.
 - Download deps:
   ```powershell
@@ -40,10 +34,6 @@
   # Required run: N=1_000_000, K=4
   gleam run -- 1000000 4 --metrics
   ```
-- Save metrics to a file (recommended):
-  ```powershell
-  gleam run -- 1000000 4 --metrics | Tee-Object -FilePath runs/N1e6_K4_batch_value.txt
-  ```
 - Output semantics:
   - Prints each valid **start index** on its own line (no decoration).
   - Prints **no output** if there are no solutions for given `N, K`.
@@ -63,21 +53,21 @@
 
 **Chosen work unit**: **`batch_size = 2000`**
 
-**How it was determined** — we measured REAL and CPU times for `N=1_000_000, K=4` over several batch sizes and picked the **lowest REAL TIME** (primary) while also observing the **CPU/REAL ratio** (parallel efficiency). All runs reported `schedulers_online = 22`.
+**How it was determined** — we measured REAL and CPU times for `N=1_000_000, K=4` over several batch sizes and picked the **lowest REAL TIME** (primary) while also observing the **CPU/REAL ratio** (parallel efficiency).
 
-| batch_size | real_ms | cpu_ms | ratio (cpu_ms/real_ms) | sched_online | utilization of scheds |
-|-----------:|--------:|-------:|-----------------------:|-------------:|----------------------:|
-| 500        | 247     | 1172   | 4.7449                 | 22           | 21.6%                 |
-| 1000       | 127     | 1062   | 8.3622                 | 22           | 38.0%                 |
-| 1500       | 111     | 1172   | 10.5586                | 22           | 48.0%                 |
-| **2000**   | **100** | **1109** | **11.0900**          | **22**       | **50.4%**             |
-| 3000       | 118     | 1031   | 8.7373                 | 22           | 39.7%                 |
+| batch_size | real_ms | cpu_ms | ratio (cpu_ms/real_ms) |
+|-----------:|--------:|-------:|-----------------------:|
+| 500        | 247     | 1172   | 4.7449                 |
+| 1000       | 127     | 1062   | 8.3622                 |
+| 1500       | 111     | 1172   | 10.5586                | 
+| **2000**   | **100** | **1109** | **11.0900**          |
+| 3000       | 118     | 1031   | 8.7373                 |
 
 **Decision**: `batch_size = 2000` because it achieved the **fastest wall time** and the **highest average scheduler utilization** without increasing tail imbalance.
 
 ---
 
-## 4) Result of running `lukas 1000000 4` (required by spec)
+## 4) Result of running `gleam run -- 1000000 4` (required by spec)
 
 - **Command**:
   ```powershell
