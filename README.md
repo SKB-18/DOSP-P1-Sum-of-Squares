@@ -1,9 +1,3 @@
-# sumsq
-
-[![Package Version](https://img.shields.io/hexpm/v/sumsq)](https://hex.pm/packages/sumsq)
-[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/sumsq/)
-
-Further documentation can be found at <https://hexdocs.pm/sumsq>.
 
 # Project 1 — Sums of Consecutive Squares (DOSP / Gleam)
 
