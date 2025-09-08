@@ -1,20 +1,10 @@
 # Project 1 — Sums of Consecutive Squares (DOSP / Gleam)
 
-> **Mapping to spec**: the PDF refers to running `lukas N K`. In this repo you run the Gleam binary with two positional args `N K` and an optional `--metrics` flag:
+> **Mapping to spec**: the PDF refers to running `lukas N K`in the pdf. In this repo you run the Gleam binary with two positional args `N K` and an optional `--metrics` flag:
 >
 > ```powershell
 > gleam run -- <N> <K> [--metrics]
 > ```
-
----
-
-## 0) Setup & dependencies
-
-- Get the code (clone or unzip) and open a shell **at the repo root**.
-- Download deps:
-  ```powershell
-  gleam deps download
-  ```
 
 ---
 
@@ -24,6 +14,10 @@
 - (Optional when changing batch size) Clean:
   ```powershell
   gleam clean
+  ```
+  - Download deps:
+  ```powershell
+  gleam deps download
   ```
 - Build:
   ```powershell
