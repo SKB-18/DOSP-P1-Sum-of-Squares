@@ -104,10 +104,10 @@
 - **Program output**: `no output` (no solutions for these parameters).
 - **Metrics**:
   ```
- METRIC real_ms=1934
- METRIC cpu_ms=23312
- METRIC cpu_per_real=12.05377456049638
- METRIC schedulers_online=22
- METRIC logical_processors_avail=22
+  METRIC real_ms=1934
+  METRIC cpu_ms=23312
+  METRIC cpu_per_real=12.05377456049638
+  METRIC schedulers_online=22
+  METRIC logical_processors_avail=22
 
 ---
