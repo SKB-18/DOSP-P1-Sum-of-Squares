@@ -11,6 +11,7 @@
 ## 1) How to build & run
 
 - Requirements: Erlang/OTP (>= 25), Gleam (>= 1.2)
+- Go to the path where the toml file is present
 - (Optional when changing batch size) Clean:
   ```powershell
   gleam clean
