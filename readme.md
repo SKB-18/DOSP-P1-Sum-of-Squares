@@ -53,7 +53,7 @@
 
 **Chosen work unit**: **`batch_size = 2000`**
 
-**How it was determined** — we measured REAL and CPU times for `N=1_000_000, K=4` over several batch sizes and picked the **lowest REAL TIME** (primary) while also observing the **CPU/REAL ratio** (parallel efficiency).
+**How it was determined** — we measured REAL and CPU times for `N=1000000, K=4` over several batch sizes and picked the **lowest REAL TIME** (primary) while also observing the **CPU/REAL ratio** (parallel efficiency).
 
 | batch_size | real_ms | cpu_ms | ratio (cpu_ms/real_ms) |
 |-----------:|--------:|-------:|-----------------------:|
@@ -77,7 +77,7 @@
   ```
   no output
   ```
-  For `K = 4`, there are no start indices `i ≤ 1_000_000` such that the sum of 4 consecutive squares starting at `i` is a perfect square.
+  For `K = 4`, there are no start indices `i ≤ 1000000` such that the sum of 4 consecutive squares starting at `i` is a perfect square.
 
 - **Metrics (batch_size = 2000)**:
   ```
@@ -98,71 +98,19 @@
 
 ---
 
-## 5) Largest problem solved (required by spec)
+## 5) Largest problem solved (spec item)
 
-- **Largest completed**: `N = 1_000_000`, `K = 4` (required run)
-- **Metrics at that size** (batch 2000): REAL **100 ms**, CPU **1109 ms**, ratio **11.09**
-- **Notes**: The computation is parallel actor-based; increasing `N` further should scale roughly linearly until memory/cache or scheduler contention dominates. If extending, keep the measured ratio < `schedulers_online` and prioritize REAL TIME when tuning `batch_size`.
-
----
-
-## 6) Correctness notes
-
-- Uses the closed form `S(n) = n(n+1)(2n+1)/6` and computes a window sum as `S(i+k-1) - S(i-1)`.
-- Checks perfect squares via integer `isqrt` and exact square test.
-- For `N = 1000, K = 4` and `N = 1_000_000, K = 4`, the program legitimately prints **no output** because there are no solutions in those ranges.
-
----
-
-## 7) Reproducibility
-
-- Machine: `<CPU model>`, `<#logical cores>`
-- OS: `<Windows 10/11 build>`
-- Erlang/OTP: `<version>`
-- Gleam: `<version>`
-- Command logs can be saved under `runs/` (e.g., using `Tee-Object`).
-
-
+- **Command**:
+  ```powershell
+  gleam run -- 9999999 999 --metrics
+  ```
+- **Program output**: `no output` (no solutions for these parameters).
+- **Metrics**:
+  ```
+  METRIC real_ms=11929
+  METRIC cpu_ms=26156
+  METRIC cpu_per_real=2.1926397853969317
+  METRIC schedulers_online=22
+  METRIC logical_processors_avail=22
 
 ---
-
-## 8) Step‑by‑step: collect and evaluate metrics (as required in the PDF)
-
-### A) Prepare
-1. **Pick a batch size**: edit `const batch_size = <value>` in `src/sumsq.gleam`.
-2. **Clean & build** (recommended when changing batch):
-   ```powershell
-   gleam clean
-   gleam build
-   ```
-
-### B) Run with metrics
-3. **Run the required workload** and optionally save the metrics:
-   ```powershell
-   gleam run -- 1000000 4 --metrics | Tee-Object -FilePath runs/N1e6_K4_batch_value.txt
-   ```
-   You should see lines like:
-   ```
-   METRIC real_ms=...
-   METRIC cpu_ms=...
-   METRIC cpu_per_real=...
-   METRIC schedulers_online=...
-   METRIC logical_processors_avail=...
-   ```
-
-### C) Interpret the numbers
-4. **Compute the ratio**: `cpu_per_real = cpu_ms / real_ms` (already printed). This approximates **effective cores used**.
-5. **Compute average scheduler utilization** (optional but informative): `util = cpu_per_real / schedulers_online`.
-   - Example (batch **2000**): `1109 / 100 = 11.09` → `11.09/22 = 0.504` → **50.4%** of schedulers utilized on average.
-6. **Pick the best batch**: prefer the **lowest real_ms**; use the ratio/utilization as a tie‑breaker. Avoid values where larger batches start to increase `real_ms` due to tail imbalance or cache effects.
-
-### D) Fill the README per the PDF
-7. In **Section 3**, paste your table and mark the chosen batch size.
-8. In **Section 4**, paste one full `--metrics` block for the chosen batch and include the brief interpretation (REAL, CPU, ratio, and effective cores vs. schedulers).
-9. In **Section 5**, state the **largest problem solved** and its metrics. If extending beyond `N=1_000_000`, note any limits.
-
-### E) Common gotchas
-- Tiny inputs can yield `cpu_ms = 0` because the VM reports CPU in whole ms for short windows; always judge with the required large run.
-- Ensure `schedulers_online` matches expectations for your machine; it bounds the maximum ratio you’ll see.
-- When changing batch size, re‑build after a `gleam clean` to avoid stale binaries.
-
