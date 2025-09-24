@@ -1,113 +1,100 @@
+# Project 2 — Gossip & Push–Sum (Gleam Actors)
 
-# Project 1 — Sums of Consecutive Squares (DOSP / Gleam)
+## Team Members
+- Kaushik Bhargav Siddani
+- Thandava Rohit Achanta
 
-> **Mapping to spec**: the PDF refers to running `lukas N K`in the pdf. In this repo you run the Gleam binary with two positional args `N K` and an optional `--metrics` flag:
->
-> ```powershell
-> gleam run -- <N> <K> [--metrics]
-> ```
-
----
-
-## 1) How to build & run
-
-- Requirements: Erlang/OTP (>= 25), Gleam (>= 1.2)
-- Go to the path where the toml file is present
-- (Optional when changing batch size) Clean:
-  ```powershell
-  gleam clean
-  ```
-  - Download deps:
-  ```powershell
-  gleam deps download
-  ```
-- Build:
-  ```powershell
-  gleam build
-  ```
-- Run (example & required by spec):
-  ```powershell
-  # Required run: N=1_000_000, K=4
-  gleam run -- 1000000 4 --metrics
-  gleam test  # Run the tests
-  ```
-- Output semantics:
-  - Prints each valid **start index** on its own line (no decoration).
-  - Prints **no output** if there are no solutions for given `N, K`.
-  - With `--metrics`, prints timing metrics at the end.
+> Add any additional teammate names above if applicable.
 
 ---
 
-## 2) Actor model & work unit (what is being parallelized?)
-
-- **Actors**: one **boss** actor partitions the range of start indices; multiple **workers** (spawned under the boss) scan their assigned subranges and reply.
-- **Work unit**: the **number of consecutive start indices** a worker receives and scans per request.
-- Implementation detail: controlled by constant `batch_size` in `src/sumsq.gleam`.
+## What’s Working
+- **Both algorithms**: `gossip` (rumor spread) and `push-sum` (average/sum via s/w ratio).
+- **Topologies** implemented and tested: `full`, `3D`, `line`, `imp3D`.
+- **Actor-based simulator**: built with **Gleam** actors. The CLI is called as:
+  ```bash
+  gleam run <numNodes> <topology> <algorithm>
+  # example (largest demo): 
+  gleam run 2000 full gossip
+  ```
+- **Output**: program prints the **convergence time in ms** for the given run (captured into `results.txt` during experiments).
+- **Plots**: `plot_results.py` parses `results.txt` and generates two graphs with all four topologies overlaid:
+  - `gossip_times.png`
+  - `pushsum_times.png`
 
 ---
 
-## 3) Work‑unit size you determined (required by spec)
+## Largest Network Size Reached (per Topology × Algorithm)
+> Based on the attached experiment log and screenshots.
 
-**Chosen work unit**: **`batch_size = 2000`**
+| Topology | Gossip (max n) | Push–Sum (max n) | Evidence |
+|---|---:|---:|---|
+| full  | **2000** | 1000 | 2000 run screenshot (`/mnt/data/9e2a2f77-a31c-465f-86c8-d89a2a1dbbe6.png`), plus `results.txt` up to 1000 |
+| imp3D | 1000 | 1000 | `results.txt` |
+| 3D    | 1000 | 1000 | `results.txt` |
+| line  | 1000 | 1000 | `results.txt` |
 
-**How it was determined** — we measured REAL and CPU times for `N=1000000, K=4` over several batch sizes and picked the **lowest REAL TIME** (primary) while also observing the **CPU/REAL ratio** (parallel efficiency).
-
-| batch_size | real_ms | cpu_ms | ratio (cpu_ms/real_ms) |
-|-----------:|--------:|-------:|-----------------------:|
-| 500        | 247     | 1172   | 4.7449                 |
-| 1000       | 127     | 1062   | 8.3622                 |
-| 1500       | 111     | 1172   | 10.5586                | 
-| **2000**   | **100** | **1109** | **11.0900**          |
-| 3000       | 118     | 1031   | 8.7373                 |
-
-**Decision**: `batch_size = 2000` because it achieved the **fastest wall time** and the **highest average scheduler utilization** without increasing tail imbalance.
+> If you run larger sizes later (e.g., 1500–3000) for other topologies/algorithms, update the table accordingly.
 
 ---
 
-## 4) Result of running `gleam run -- 1000000 4` (required by spec)
+## Reproducing the Plots
 
-- **Command**:
-  ```powershell
-  gleam run -- 1000000 4 --metrics
-  ```
-- **Program output**:
-  ```
-  no output
-  ```
-  For `K = 4`, there are no start indices `i ≤ 1000000` such that the sum of 4 consecutive squares starting at `i` is a perfect square.
+1. Run experiments and append each result as a line to `results.txt` in either of the accepted formats:
+   - Pretty: `n=<N> topology=<top> algorithm=<alg> ms=<time_ms>`
+   - CSV:    `PLOT,<N>,<top>,<alg>,<time_ms>`
+2. Generate graphs:
+   ```bash
+   python3 plot_results.py results.txt
+   # optional flags
+   #   --no-nudge  (turn off small y–nudges that prevent line crossings)
+   #   --ymax 12000
+   #   --logy
+   ```
+3. Check output files created in the same folder:
+   - `gossip_times.png`
+   - `pushsum_times.png`
 
-- **Metrics (batch_size = 2000)**:
-  ```
-  METRIC real_ms=100
-  METRIC cpu_ms=1109
-  METRIC cpu_per_real=11.09
-  METRIC schedulers_online=22
-  METRIC logical_processors_avail=22
-  ```
-
-- **Interpretation**:
-  - **REAL TIME** = wall-clock milliseconds for the run.
-  - **CPU TIME** = total CPU milliseconds consumed by the Erlang VM across all schedulers during the same window.
-  - **Effective cores used** ≈ `cpu_ms / real_ms` = **11.09** (of 22 online schedulers ⇒ ~50.4% average utilization during the window).
-  - A ratio near **1.0** would indicate almost no parallelism; our ratio shows healthy parallel execution.
-
-> Note: For very small inputs the runtime reports CPU in whole milliseconds; tiny jobs may show `cpu_ms = 0`. Always use the large required run above for evaluation.
+> The script auto-detects UTF-8/UTF-16 encodings in `results.txt` and safely merges duplicate (N, topology, algorithm) entries by keeping the latest value. It overlays all four topologies on a single chart for each algorithm.
 
 ---
 
-## 5) Largest problem solved (spec item)
-
-- **Command**:
-  ```powershell
-  gleam run -- 9999999 999 --metrics
-  ```
-- **Program output**: `no output` (no solutions for these parameters).
-- **Metrics**:
-  ```
-  METRIC real_ms=1934
-  METRIC cpu_ms=23312
-  METRIC cpu_per_real=12.05377456049638
-  METRIC schedulers_online=22
-  METRIC logical_processors_avail=22
+## Files of Interest
+- `project2_args.erl` — small Erlang shim to pass raw CLI args into Gleam as proper binaries (so Gleam sees correct `String`s).
+- `project2.gleam`, `gossip_actor.gleam`, `project2_test.gleam` — core Gleam sources and test harness.
+- `results.txt` — collected timing data.
+- `plot_results.py` — plotting utility (headless-safe; produces PNGs).
 
 ---
+
+## How to Run
+
+```bash
+# Gossip on a full graph (demoing the largest recorded run)
+gleam run 2000 full gossip
+
+# A few smaller examples
+gleam run 1000 imp3D push-sum
+gleam run 500 3D gossip
+gleam run 100 line push-sum
+```
+
+If you want to benchmark at scale, script multiple runs and append the output lines into `results.txt`, then re-run `plot_results.py`.
+
+---
+
+## Notes / Deviations (if any)
+- Plots are provided as PNGs. If your course portal requests a **Report.pdf**, you can paste these two figures with a short commentary and export to PDF.
+- The termination conditions follow the spec: **Gossip** actors stop after hearing the rumor a fixed number of times; **Push–Sum** actors stop when the `s/w` ratio stabilizes below a small epsilon over consecutive rounds.
+- No failure model is included in this base submission. Add a `Report-bonus.pdf` if you later implement node/edge failure experiments.
+
+---
+
+## Screenshots
+- Largest run (2000 nodes, full, gossip): `/mnt/data/9e2a2f77-a31c-465f-86c8-d89a2a1dbbe6.png`
+- Plots: `gossip_times.png`, `pushsum_times.png`
+
+---
+
+## License
+Academic use for the course project.
