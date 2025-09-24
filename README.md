@@ -29,7 +29,7 @@
 
 | Topology | Gossip (max n) | Push–Sum (max n) | Evidence |
 |---|---:|---:|---|
-| full  | **2000** | 1000 | 2000 run screenshot (`n=2000 topology=full algorithm=gossip ms=6308`), plus `n=2000 topology=full algorithm=push-sum ms=4019`|
+| full  | **2000** | 2000 |(`n=2000 topology=full algorithm=gossip ms=5308`), plus `n=2000 topology=full algorithm=push-sum ms=3419`|
 | imp3D | 1000 | 1000 | `results.txt` |
 | 3D    | 1000 | 1000 | `results.txt` |
 | line  | 1000 | 1000 | `results.txt` |
