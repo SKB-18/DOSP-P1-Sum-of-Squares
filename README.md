@@ -29,7 +29,7 @@
 
 | Topology | Gossip (max n) | Push–Sum (max n) | Evidence |
 |---|---:|---:|---|
-| full  | **2000** | 1000 | 2000 run screenshot (`n=2000 topology=full algorithm=gossip ms=6308`), plus `results.txt` up to 1000 |
+| full  | **2000** | 1000 | 2000 run screenshot (`n=2000 topology=full algorithm=gossip ms=6308`), plus `n=2000 topology=full algorithm=push-sum ms=4019`|
 | imp3D | 1000 | 1000 | `results.txt` |
 | 3D    | 1000 | 1000 | `results.txt` |
 | line  | 1000 | 1000 | `results.txt` |
@@ -53,8 +53,3 @@ gleam run 2000 full gossip
 
 ---
 
-## Screenshots
-- Largest run (2000 nodes, full, gossip): `n=2000 topology=full algorithm=gossip ms=6308`
-- Plots: `gossip_times.png`, `pushsum_times.png`
-
----
